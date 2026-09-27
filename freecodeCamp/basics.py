@@ -55,6 +55,36 @@
 # print( name + surname )
 
 # print(name + " " + surname)
+# concatinating rulessss'''
+# # letter = "ja"
+# # print(letter*3)
+# name = "gorkha"
+# print("hello " + name)
+# print("hello"+ " " +"gorkha")
 
-letter = "ja"
-print(letter*3)
+# repeating string
+# sign = "~"
+# print(sign * 30)
+
+# concatenating strings numbers
+
+# name = "sarmila"
+# age = 26
+# log_entry = "username " + name + " surname " + str(age) + " address"
+# print(log_entry)
+
+# log_entry += " birthday"
+# print(log_entry)
+
+# username = "gorkha-dev"
+# role = "Admin"
+# projects_completed = 14
+
+# # Notice the 'f' right before the quote. 
+# # No str() needed for the integer, and no ugly + signs cluttering the text.
+# dashboard_welcome = f'Welcome {username}! Your role is {role} and you have completed {projects_completed} projects.'
+
+# print(dashboard_welcome)
+
+# # You can also do math directly inside the braces:
+# print(f'If you finish 2 more, you will have {projects_completed + 2} total projects.')
