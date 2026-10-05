@@ -1,59 +1,24 @@
-# 1- veriables setup
+# step 1 variables set
 distance_mi = 1
 is_raining = True
-has_bike = True
+has_bike = False
 has_car = True
 has_ride_share_app = True
-# 2- 
+# condition set up
 if not distance_mi:
-    print("False")
+    print(False)
 elif distance_mi <= 1:
     if not is_raining:
         print(True)
     else:
         print(False)
-# 1- veriables setup
-distance_mi = 1
-is_raining = True
-has_bike = True
-has_car = True
-has_ride_share_app = True
-# 2- 
-if not distance_mi:
-    print("False")
-elif distance_mi <= 1:
-    if not is_raining:
+elif distance_mi > 1 and distance_mi <= 6:
+    if has_bike and not is_raining:
         print(True)
     else:
         print(False)
-        
-# 1- veriables setup
-distance_mi = 1
-is_raining = True
-has_bike = True
-has_car = True
-has_ride_share_app = True
-# 2- 
-if not distance_mi:
-    print("False")
-elif distance_mi <= 1:
-    if not is_raining:
+elif distance_mi > 6:
+    if has_car or has_ride_share_app:
         print(True)
     else:
         print(False)
-        
-# 1- veriables setup
-distance_mi = 1
-is_raining = True
-has_bike = True
-has_car = True
-has_ride_share_app = True
-# 2- 
-if not distance_mi:
-    print("False")
-elif distance_mi <= 1:
-    if not is_raining:
-        print(True)
-    else:
-        print(False)
-        

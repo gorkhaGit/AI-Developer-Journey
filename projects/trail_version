@@ -1,0 +1,13 @@
+#this is a test i reppeat
+
+is_hungry = True
+has_rice = False
+money = 1000
+if not is_hungry:
+    print("Do not eat")
+elif is_hungry and has_rice:
+    print("Cook Dal Bhat")
+elif not has_rice and money > 500:
+    print("Order Pathao Food")
+else: # not has_rice and money<500:
+    print("Eat Wai Wa")
