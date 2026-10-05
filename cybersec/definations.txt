@@ -1,0 +1,6 @@
+port ; doors to the server
+certificate== id card jastai 
+ssl = pipline jaha suttukka password adan pardan huncha
+
+#shodan
+#censys
