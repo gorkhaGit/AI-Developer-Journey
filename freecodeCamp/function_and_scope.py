@@ -23,13 +23,26 @@
 #     return a + b
 
 # my_summ = calculate_sum(3 ,1)
-# print(my_sum)
-def create_greetin(username):
-    return f"Welcome to your ai dashboard, {username}!"
-user_message = create_greetin("Sarmila nepali")
-print(user_message)
+# # print(my_sum)
+# def create_greetin(username):
+#     return f"Welcome to your ai dashboard, {username}!"
+# user_message = create_greetin("Sarmila nepali")
+# print(user_message)
 
-def calculate_sum(a,b):
-    return( a + b)
-my_sum = calculate_sum(3 ,1)
-print(my_sum)
+# def calculate_sum(a,b):
+#     return( a + b)
+# my_sum = calculate_sum(3 ,1)
+# print(my_sum)
+app_name = "Gorkha Ai"
+def generate_text(prompt):
+    api_key = "secret key 123"
+    response = f"Sending '{prompt}' to {app_name} using {api_key}"
+    return response
+# This works because we call the function properly:
+print(generate_text("Write a Python script"))
+
+# This works because app_name is Global:
+print(app_name)
+
+# This will CRASH. api_key is Local. Python doesn't know what it is out here.
+print(api_key)
