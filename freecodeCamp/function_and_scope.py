@@ -46,7 +46,6 @@
 
 # # This will CRASH. api_key is Local. Python doesn't know what it is out here.
 # print(api_key)
-
 available_eggs = 1
 available_flour = 2
 available_sugar = 3
@@ -67,3 +66,17 @@ def use_eggs(available_eggs, eggs_to_use):
 
     print(f'{eggs_to_use} egg(s) used out of {available_eggs} available.')
     return available_eggs - eggs_to_use
+
+use_eggs(available_eggs, 1)
+print(available_eggs)
+
+def make_fried_egg(available_eggs):
+    has_enough_eggs = available_eggs >= 1
+
+    if has_enough_eggs:
+        available_eggs = use_eggs(available_eggs, 1)
+        print('Made a fried egg. Yummy!')
+    else:
+        print('Could not make a fried egg. Not enough eggs!')
+
+    return available_eggs
