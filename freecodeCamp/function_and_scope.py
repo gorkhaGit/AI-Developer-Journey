@@ -33,16 +33,37 @@
 #     return( a + b)
 # my_sum = calculate_sum(3 ,1)
 # print(my_sum)
-app_name = "Gorkha Ai"
-def generate_text(prompt):
-    api_key = "secret key 123"
-    response = f"Sending '{prompt}' to {app_name} using {api_key}"
-    return response
-# This works because we call the function properly:
-print(generate_text("Write a Python script"))
+# app_name = "Gorkha Ai"
+# def generate_text(prompt):
+#     api_key = "secret key 123"
+#     response = f"Sending '{prompt}' to {app_name} using {api_key}"
+#     return response
+# # This works because we call the function properly:
+# print(generate_text("Write a Python script"))
 
-# This works because app_name is Global:
-print(app_name)
+# # This works because app_name is Global:
+# print(app_name)
 
-# This will CRASH. api_key is Local. Python doesn't know what it is out here.
-print(api_key)
+# # This will CRASH. api_key is Local. Python doesn't know what it is out here.
+# print(api_key)
+
+available_eggs = 1
+available_flour = 2
+available_sugar = 3
+
+def check_kitchen_stock():
+    total_items = available_eggs + available_flour + available_sugar
+    print(f'The kitchen has {total_items} total items:')
+    print(f'- {available_eggs} eggs')
+    print(f'- {available_flour} flour')
+    print(f'- {available_sugar} sugar')
+
+check_kitchen_stock()
+
+def use_eggs(available_eggs, eggs_to_use):
+    if eggs_to_use > available_eggs:
+        print('The kitchen does not have enough eggs.')
+        return available_eggs
+
+    print(f'{eggs_to_use} egg(s) used out of {available_eggs} available.')
+    return available_eggs - eggs_to_use
