@@ -1,0 +1,8 @@
++ add 
+- subtraact
+* multiply
+/ devide
+
+== is equal to 
+!= not equal to
+
