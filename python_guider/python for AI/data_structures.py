@@ -27,5 +27,3 @@ info["gender"] = "male"
 del info["gender"]
 print(info)
 
-another_list = dict(math = 95, science = 87, english = 55)
-print(another_list[math])
